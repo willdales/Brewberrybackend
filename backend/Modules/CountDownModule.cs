@@ -9,11 +9,13 @@ using backend.Models;
 //using BrewFramework.Models;
 using Microsoft.Extensions.Configuration;
 using backend.Hardware;
+using Microsoft.Extensions.Hosting;
 //using HouseBrewPanel.Hardware;
 
 namespace backend.Modules 
 {
-    public class CountDownModule
+    public class CountDownModule 
+        //IHostedService
     {
         private Timer _timer;
         private readonly SemaphoreSlim _countdownStateLock = new SemaphoreSlim(1, 1);
@@ -59,6 +61,8 @@ namespace backend.Modules
            // _countDown = new CountDown();
             _countDownState = CountDownStatus.Reset;
         }
+
+        
 
         public async Task SetCountDownFromPreset(int index)
         {

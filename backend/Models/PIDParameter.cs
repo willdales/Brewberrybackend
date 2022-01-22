@@ -26,6 +26,8 @@ namespace backend.Models
     {
         public PIDParameter Params { get; set; }
         public PIDState State { get; set; }
+
+        public bool ElementState { get; set; }
     }
 
     public enum PIDState

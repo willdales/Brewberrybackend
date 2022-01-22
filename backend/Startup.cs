@@ -65,7 +65,7 @@ namespace backend
             {
 
                 builder.AllowAnyMethod().AllowAnyHeader().AllowCredentials().AllowAnyOrigin().AllowCredentials()
-                .WithOrigins("http://192.168.1.36:8080")
+                .WithOrigins("http://192.168.1.73:8080")
                 
                 .SetIsOriginAllowed((host) => true);
 

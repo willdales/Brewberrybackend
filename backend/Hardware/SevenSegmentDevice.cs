@@ -90,9 +90,18 @@ namespace backend.Hardware
 
         private void WriteBuffer()
         {
-            for (int i = 0; i < 5; i++)
+            try
             {
-                _i2cDevice.Write(DisplayBuffer[i]);
+
+
+                for (int i = 0; i < 5; i++)
+                {
+                    _i2cDevice.Write(DisplayBuffer[i]);
+                }
+            }
+            catch(Exception ex)
+            {
+                //no need to do anything - just avoiding the error is enough...
             }
         }
 

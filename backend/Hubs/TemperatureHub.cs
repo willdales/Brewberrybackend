@@ -20,22 +20,29 @@ namespace backend.Hubs
             temperatureModule = module;
         }
 
-        public List<TempSensor> GetTempSensors()
+        public List<TempSensor> GetSavedProbes()
         {
-            return temperatureModule.GetCurrentValues();
+            return temperatureModule.GetSavedProbes();
         }
+
+
+
+        //public Dictionary<string, GetTempSensors()
+        //{
+        //    return temperatureModule.GetCurrentValues();
+        //}
         //public List<string> getRawHardwareDevices()
         //{
         //   return temperatureModule.
         //}
 
-        
+
 
         //public async Task RegisterHardwareDevice()
         //{
         //    await Groups.AddToGroupAsync(Context.ConnectionId, "hardware");
         //}
-        
+
         //public async Task TempReadings(Dictionary<string, double> readings)
         //{
         //    await _temperatureControlModule.SetTemperatureValues(readings);

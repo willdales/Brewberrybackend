@@ -20,8 +20,10 @@ namespace backend.Modules
         private TemperatureProbeManager probemanager;
         private IStoreProvider StoreProvider;
         private List<TempSensor> sensors;
+        public Dictionary<string, double> Readings { get; set; }
         private string envFolder;
         private readonly TimeSpan _tickInterval = TimeSpan.FromSeconds(5);
+        
 
         public event EventHandler TemperatureChanged;
 
@@ -36,6 +38,7 @@ namespace backend.Modules
             Hub = hub;
             Configuration = configuration;
             StoreProvider = new JsonStoreProvider(configuration);
+            
             StoreProvider.SetStoreName("tempSensors");
             //Configuration.
             //envFolder = env.ContentRootPath;
@@ -52,6 +55,39 @@ namespace backend.Modules
 
 
 
+        }
+
+        public List<TempSensor> GetSavedProbes()
+        {
+
+            foreach(TempSensor t in sensors)
+            {
+                if(!Readings.ContainsKey(t.SensorId))
+                {
+                    t.State = SensorState.Deleted;
+                }
+            }
+
+            foreach(string sensorId in Readings.Keys)
+            {
+                TempSensor existing = sensors.Find(s => s.SensorId == sensorId);
+
+                if(existing is null)
+                {
+                    sensors.Add(
+                        new TempSensor()
+                        {
+                            SensorId = sensorId,
+                            DefaultSelected = false,
+                            State = SensorState.New,
+                            Name = ""
+                            
+                        });
+                }
+               
+            }
+
+            return sensors;
         }
 
         public void Initialize()
@@ -94,17 +130,18 @@ namespace backend.Modules
             _timer = new Timer(CountDownTick, null, _tickInterval, _tickInterval);
         }
 
-        public List<TempSensor> GetCurrentValues()
-        {
-            return sensors;
-        }
+        //public List<TempSensor> GetCurrentValues()
+        //{
+        //    return sensors;
+        //}
 
         
+        
 
-        public TempSensor GetCurrentSensorValue(string sensorID)
-        {
-            return sensors.Find(item => item.SensorId == sensorID);
-        }
+        //public TempSensor GetCurrentSensorValue(string sensorID)
+        //{
+        //    return sensors.Find(item => item.SensorId == sensorID);
+        //}
 
         public void SaveSensors(List<TempSensor> _sensors)
         {
@@ -116,36 +153,18 @@ namespace backend.Modules
 
         public async Task GetTemperatureValues()
         {
-            Dictionary<string, double> readings = probemanager.readTemperatures();
+            Readings = probemanager.readTemperatures();
             
-            await SetTemperatureValues(readings);
+            await SetTemperatureValues();
 
         }
 
-        public async Task SetTemperatureValues(Dictionary<string, double> readings)
+        public async Task SetTemperatureValues()
         {
-         //   Console.WriteLine("Reading Sensors");
-            foreach (KeyValuePair<string, double> entry in readings)
-            {
-                //Console.WriteLine("Sensor:  " + entry.Key);
-                TempSensor sensor = sensors.Find(s => s.SensorId == entry.Key);
-                if (sensors.Count > 0 && sensor != null)
-                {
-                    sensor.Reading = entry.Value;
-                }
-                else
-                {
-                    sensor = new TempSensor() { SensorId = entry.Key, Name = entry.Key, Reading = entry.Value };
-                    sensors.Add(sensor);
-                }
-
-                StoreProvider.SaveStore<TempSensor>(sensors);
-                //SaveStore();
-
-            }
+         
 
             OnTemperaturesChanged(EventArgs.Empty);
-            await Hub.Clients.All.SendAsync("tempvalues_set", sensors);
+            await Hub.Clients.All.SendAsync("tempvalues_set", Readings);
         }
     
 }

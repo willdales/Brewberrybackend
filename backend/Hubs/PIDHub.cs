@@ -21,6 +21,11 @@ namespace backend.Hubs
             await module.setTargetTemperature(target);
         }
 
+        public async Task SetPIDSensor(string sensorID)
+        {
+             module.ChangeTempSensor(sensorID);
+        }
+
         public async Task GetPing()
         {
             await module.GetPing();

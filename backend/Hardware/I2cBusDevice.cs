@@ -10,7 +10,7 @@ namespace backend.Hardware
     {
         protected int Bus = 1;
 
-        protected static I2cDevice GetDevice(I2cConnectionSettings settings)
+        protected I2cDevice GetDevice(I2cConnectionSettings settings)
         {
             return I2cDevice.Create(settings);
             //return new System.Device.I2c.I2cDevice()

@@ -42,9 +42,14 @@ namespace backend.Controllers
             [HttpGet("[action]")]
             public IEnumerable<TempSensor> GetAllTempSensors()
             {
-                return _tempModule.GetCurrentValues();
+            return _tempModule.GetSavedProbes();
             }
             
+            [HttpGet("[action]")]
+            public Dictionary<string, double> GetCurrentTempValues()
+        {
+            return _tempModule.Readings;
+        }
  
 
             [HttpPost]

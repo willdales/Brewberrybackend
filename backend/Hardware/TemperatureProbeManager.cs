@@ -59,16 +59,23 @@ namespace backend.Hardware
 
                 foreach (var tempSensor in sensors)
                 {
-
-                    var result = tempSensor.GetTemperature();
-                    readings.Add(tempSensor.OneWireAddressString, Math.Round(result, 2));
-
+                    try
+                    {
+                        var result = tempSensor.GetTemperature();
+                        Task.Delay(TimeSpan.FromMilliseconds(100)).Wait();
+                        readings.Add(tempSensor.OneWireAddressString, Math.Round(result, 2));
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine("Error Reading Probes...");
+                    }
                     //connection.InvokeAsync<Dictionary<string, double>>("TempReadings", readings);
                 }
 
                 return readings;
 
             }
+            
             finally
             {
                 _probeReadLock.Release();

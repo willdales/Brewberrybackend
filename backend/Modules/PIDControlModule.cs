@@ -83,13 +83,16 @@ namespace backend.Modules
                     Target = 40,
                     LastOutput = 0,
                     LastValue = 0
+                    
 
                 };
                 p.Add(parameters);
                 //StoreProvider.SaveStore<PIDParameter>(p);
             }
 
-            activeSensorID = _temperatureControlModule.GetCurrentValues().Find(sensor => sensor.DefaultSelected).SensorId;
+            activeSensorID = _temperatureControlModule.GetSavedProbes().Find(sensor => sensor.DefaultSelected).SensorId;
+
+            
 
             op = new PIDOperationalParameters();
 
@@ -146,6 +149,8 @@ namespace backend.Modules
 
         public async Task GetPing()
         {
+
+            op.ElementState = prevElState;
             await this.Hub.Clients.All.SendAsync("pid_ping", op);
         }
 
@@ -157,11 +162,11 @@ namespace backend.Modules
 
             DateTime current = DateTime.Now;
 
-            TempSensor probe = _temperatureControlModule.GetCurrentSensorValue(activeSensorID);
+            double tempReading = _temperatureControlModule.Readings[activeSensorID];
 
-            if (probe.Reading != op.Params.LastValue)
+            if (tempReading != op.Params.LastValue)
             {
-                op.Params.LastValue = probe.Reading;
+                op.Params.LastValue = tempReading;
 
 
                 _displayManager.WriteTemperatureDisplays(op.Params);
@@ -199,7 +204,7 @@ namespace backend.Modules
             }
             else
             {
-                pidController.Compute(probe.Reading);
+                pidController.Compute(tempReading);
             }
 
             double newOutput;
@@ -245,8 +250,10 @@ namespace backend.Modules
                 if (!prevElState)
                 {
                     prevElState = true;
+                    op.ElementState = prevElState;
                     await this.Hub.Clients.All.SendAsync("pid_change", "CONTROL", "ON");
                     _hardwareIOModule.SetHeatingElement(prevElState);
+                    
                 }
 
             }
@@ -255,6 +262,7 @@ namespace backend.Modules
                 if (prevElState)
                 {
                     prevElState = false;
+                    op.ElementState = prevElState;
                     _hardwareIOModule.SetHeatingElement(prevElState);
                     await this.Hub.Clients.All.SendAsync("pid_change", "CONTROL", "OFF");
                 }
@@ -365,9 +373,10 @@ namespace backend.Modules
             await this.Hub.Clients.All.SendAsync("pid_change", "NEWTARGET", target);
         }
 
-        public void ChangeTempSensor(string sensorID)
+        public async Task ChangeTempSensor(string sensorID)
         {
             activeSensorID = sensorID;
+            await setTargetTemperature(op.Params.Target.ToString());
 
             //Hub.Clients.All.SendAsync("pidTemp_change", this.activeSensor, parameters.Target);
             //_temperatureControlModule.
